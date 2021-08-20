@@ -1,20 +1,22 @@
 import React from 'react';
 import Header from "./components/Header";
-import Item from "./components/Item";
 import Form from "./components/Form";
+import Item from "./components/Item";
 
-import './App.css';
 
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       newItemValue: "",
-      items: [
-        // { text: "First Todo", done: false },
-        // { text: "Second Todo", done: true },
-      ]
+      items: [] // start with a blank array of ToDo objects
     }
+
+    //const items = [];
+    this.state.items.push = fetch('http://localhost:3004/todos')
+              .then(response => response.json()) // <!-- response.json() deserialises the body and returns a Promise
+              .then(items => console.log(items))
+    
 
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
@@ -31,7 +33,7 @@ class App extends React.Component {
 
     let items = this.state.items.slice()
 
-    // don't allow to add blank todos
+    // don't allow to add blank ToDos
     if(this.state.newItemValue !== '')
       items.push({
         text: this.state.newItemValue,
@@ -73,7 +75,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="App">
+      <div>
         <Header />
           <Form handleSubmit={this.handleSubmit} newItemValue={this.state.newItemValue} handleChange={this.handleChange} />
           <ol>

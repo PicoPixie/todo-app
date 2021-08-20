@@ -1,7 +1,7 @@
 import React from 'react'
 import Button from "./Button";
 
-function Item(props) {
+const Item = (props) => {
   return (
     <li>
       <label>
@@ -10,7 +10,7 @@ function Item(props) {
         <Button deleteTodo={props.onDelete} /> 
       </label>
     </li>
-  )
+  );
 }
-
+ 
 export default Item;

@@ -1,7 +1,10 @@
 import React from 'react'
 
-function Header() {
-  return <h1>ToDo List</h1>
+const Header = () => {
+  const pageTitle = "ToDo List";
+  return ( 
+    <h1>{pageTitle}</h1>
+  );
 }
-
+ 
 export default Header;
