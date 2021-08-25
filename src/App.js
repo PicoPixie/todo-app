@@ -3,25 +3,34 @@ import Header from "./components/Header";
 import Form from "./components/Form";
 import Item from "./components/Item";
 
-
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       newItemValue: "",
-      items: [] // start with a blank array of ToDo objects
+      items: []
     }
-
-    //const items = [];
-    this.state.items.push = fetch('http://localhost:3004/todos')
-              .then(response => response.json()) // <!-- response.json() deserialises the body and returns a Promise
-              .then(items => console.log(items))
-    
 
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.toggleTodo   = this.toggleTodo.bind(this)
     this.deleteTodo   = this.deleteTodo.bind(this)
+  }
+
+  componentDidMount() {
+    this.getToDos();
+  }
+
+  getToDos() {
+    this.setState( () => {
+      fetch("http://localhost:3001/todos")
+        .then(res => res.json())
+        .then(todos => this.setState({
+            items: todos
+          })
+        )
+        .catch(console.log);
+    });
   }
 
   handleChange(event) {
@@ -30,18 +39,38 @@ class App extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-
     let items = this.state.items.slice()
+    // what's the highest ID seen so far in our persistent store of items[].?
+    let count = items.length;
+    // inc. to the next available number, ready for new item POST
+    count++;
 
-    // don't allow to add blank ToDos
+    // don't allow them to add blank ToDos
     if(this.state.newItemValue !== '')
-      items.push({
-        text: this.state.newItemValue,
-        done: false,
-      })
+      // update the Mockend API
+      fetch("http://localhost:3001/todos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify( {
+          'id': count,
+          'text': this.state.newItemValue,
+          'done': false
+        })
+      }).then(
+        items.push({
+          text: this.state.newItemValue,
+          done: false,
+        })
+      )
+      .then(console.log(JSON.stringify( {'id': count, 'text': this.state.newItemValue, 'done': false})))
+      .then(console.log(count));
+
     else
       alert("Cannot add a blank ToDo")
 
+    // let REACT update the view, don't make a fresh GET req't
     this.setState({
       newItemValue: '',
       items: items
@@ -61,13 +90,18 @@ class App extends React.Component {
   deleteTodo(index) {
     let items = this.state.items.slice()
     let deadItem = items[index]
-    console.log(deadItem) // is an {object} e.g {text:"first item", done: true}
+    console.log(deadItem) // is an {object} e.g {id: N, text:"first item", done: true}
     // validate - warn if delete attempt against not done/checked item.?
     if(deadItem.done !== true)
       alert("Cannot delete an un-done ToDo")
     else
       items = items.filter( item => item !== deadItem)
+      // delete from the Mockend API (db.json)
+      fetch("http://localhost:3001/todos/" + deadItem.id, {
+        method: "DELETE",
+      });
 
+    // let REACT update the view, don't make a fresh GET req't
     this.setState({
       items: items
     })
