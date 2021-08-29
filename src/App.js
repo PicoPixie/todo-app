@@ -11,17 +11,18 @@ class App extends React.Component {
       items: []
     }
 
-    this.handleChange = this.handleChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
-    this.toggleTodo   = this.toggleTodo.bind(this)
-    this.deleteTodo   = this.deleteTodo.bind(this)
+    // don't need these bindings if using => fns.
+    //this.handleChange = this.handleChange.bind(this)
+    //this.handleSubmit = this.handleSubmit.bind(this)
+    //this.toggleTodo   = this.toggleTodo.bind(this)
+    //this.deleteTodo   = this.deleteTodo.bind(this)
   }
 
   componentDidMount() {
     this.getToDos();
   }
 
-  getToDos() {
+  getToDos = () => {
     this.setState( () => {
       fetch("http://localhost:3001/todos")
         .then(res => res.json())
@@ -33,17 +34,19 @@ class App extends React.Component {
     });
   }
 
-  handleChange(event) {
+  handleChange = (event) => {
     this.setState({ newItemValue: event.target.value })
   }
 
-  handleSubmit(event) {
+  handleSubmit = (event) => {
     event.preventDefault();
     let items = this.state.items.slice()
     // what's the highest ID seen so far in our persistent store of items[].?
-    let count = items.length;
-    // inc. to the next available number, ready for new item POST
-    count++;
+    // peek at the last array object's ID and go from there
+    let lastObject = this.state.items.slice(-1)
+    let lastObjectId = lastObject.id
+    // inc. to the next available number, ready for new item POST, we don't re-use IDs
+    let newObjectId = lastObjectId++
 
     // don't allow them to add blank ToDos
     if(this.state.newItemValue !== '')
@@ -54,7 +57,7 @@ class App extends React.Component {
           "Content-Type": "application/json"
         },
         body: JSON.stringify( {
-          'id': count,
+          'id': newObjectId,
           'text': this.state.newItemValue,
           'done': false
         })
@@ -64,8 +67,8 @@ class App extends React.Component {
           done: false,
         })
       )
-      .then(console.log(JSON.stringify( {'id': count, 'text': this.state.newItemValue, 'done': false})))
-      .then(console.log(count));
+      .then(console.log(JSON.stringify( {'id': newObjectId, 'text': this.state.newItemValue, 'done': false})));
+      //.then(console.log(count));
 
     else
       alert("Cannot add a blank ToDo")
@@ -77,7 +80,7 @@ class App extends React.Component {
     })
   }
 
-  toggleTodo(index) {
+  toggleTodo = (index) => {
     let items = this.state.items.slice()
     let item = items[index]
     item.done = !item.done
@@ -87,7 +90,7 @@ class App extends React.Component {
     })
   }
 
-  deleteTodo(index) {
+  deleteTodo = (index) => {
     let items = this.state.items.slice()
     let deadItem = items[index]
     console.log(deadItem) // is an {object} e.g {id: N, text:"first item", done: true}
